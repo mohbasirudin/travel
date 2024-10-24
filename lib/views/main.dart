@@ -167,12 +167,13 @@ class _PageMainState extends State<PageMain> {
   }
 
   Widget _viewMap(MainLoaded state) {
+    var locHotels = state.copyWith().locHotels;
     var cLoc = state.copyWith().currentLatLng;
     return FlutterMap(
       mapController: state.mapController,
       options: MapOptions(
         initialCenter: cLoc!,
-        initialZoom: 18,
+        initialZoom: 12,
         onTap: (pos, latlang) {},
       ),
       children: [
@@ -190,6 +191,16 @@ class _PageMainState extends State<PageMain> {
                 size: 24,
               ),
             ),
+            if (locHotels.isNotEmpty)
+              for (var i = 0; i < locHotels.length; i++)
+                Marker(
+                  point: locHotels[i],
+                  child: const Icon(
+                    Icons.hotel,
+                    color: Colors.blue,
+                    size: 24,
+                  ),
+                ),
           ],
         ),
         CircleLayer(

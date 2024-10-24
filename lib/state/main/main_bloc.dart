@@ -115,10 +115,6 @@ class MainBloc extends Bloc<MainEvent, MainState> {
               lat: currentLatLng.latitude,
               long: currentLatLng.longitude,
             ),
-            // ApiUrl.hotels(
-            //   lat: -8.372224,
-            //   long: 114.147328,
-            // ),
           ),
         );
         print("hotels: ${currentLatLng.latitude}, ${currentLatLng.longitude}");
@@ -126,14 +122,12 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         if (respHotel.statusCode == 200) {
           var maps = jsonDecode(respHotel.body);
           var features = maps["features"];
-          print("features: ${features.length}");
           for (var i = 0; i < features.length; i++) {
             var props = features[i]["properties"];
             if (props.containsKey("name")) {
               var name = props["name"];
               var lat = props["lat"];
               var long = props["lon"];
-              print("features: data: $name, $lat, $long");
 
               hotels.add({
                 "name": name,
@@ -145,6 +139,11 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         }
       }
 
+      var locHotels = <LatLng>[];
+      for (var i = 0; i < hotels.length; i++) {
+        locHotels.add(LatLng(hotels[i]["lat"], hotels[i]["long"]));
+      }
+
       emit(MainLoaded(
         cities: cities,
         txtFrom: "-",
@@ -152,6 +151,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         txtDate: "-",
         mapController: mapController,
         currentLatLng: currentLatLng,
+        locHotels: locHotels,
         hotels: hotels,
       ));
     } catch (e) {
