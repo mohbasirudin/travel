@@ -109,48 +109,13 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       var hotels = <Map>[];
       if (cLocation != null) {
         currentLatLng = LatLng(cLocation.latitude, cLocation.longitude);
-        var respHotel = await http.get(
-          Uri.parse(
-            ApiUrl.hotels(
-              lat: currentLatLng.latitude,
-              long: currentLatLng.longitude,
-            ),
-          ),
+        hotels = await getHotels(
+          currentLatLng.latitude,
+          currentLatLng.longitude,
         );
-        print("hotels: ${currentLatLng.latitude}, ${currentLatLng.longitude}");
-
-        if (respHotel.statusCode == 200) {
-          var maps = jsonDecode(respHotel.body);
-          var features = maps["features"];
-          for (var i = 0; i < features.length; i++) {
-            var props = features[i]["properties"];
-            if (props.containsKey("name")) {
-              var name = props["name"];
-              var lat = props["lat"];
-              var long = props["lon"];
-              var disctance = Geolocator.distanceBetween(
-                    currentLatLng.latitude,
-                    currentLatLng.longitude,
-                    lat,
-                    long,
-                  ) /
-                  1000;
-
-              hotels.add({
-                "name": name,
-                "lat": lat,
-                "long": long,
-                "distance": disctance.toStringAsFixed(2),
-              });
-            }
-          }
-        }
       }
 
-      var locHotels = <LatLng>[];
-      for (var i = 0; i < hotels.length; i++) {
-        locHotels.add(LatLng(hotels[i]["lat"], hotels[i]["long"]));
-      }
+      var locHotels = await getLocHotels(hotels);
 
       emit(MainLoaded(
         cities: cities,
@@ -166,6 +131,46 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       print("main error: $e");
       emit(MainError());
     }
+  }
+
+  Future<List<LatLng>> getLocHotels(List<Map> hotels) async {
+    var locHotels = <LatLng>[];
+    for (var i = 0; i < hotels.length; i++) {
+      locHotels.add(LatLng(hotels[i]["lat"], hotels[i]["long"]));
+    }
+    return locHotels;
+  }
+
+  Future<List<Map>> getHotels(double lat, double long) async {
+    var hotels = <Map>[];
+    var respHotel = await http.get(
+      Uri.parse(
+        ApiUrl.hotels(lat: lat, long: long),
+      ),
+    );
+
+    if (respHotel.statusCode == 200) {
+      var maps = jsonDecode(respHotel.body);
+      var features = maps["features"];
+      for (var i = 0; i < features.length; i++) {
+        var props = features[i]["properties"];
+        if (props.containsKey("name")) {
+          var name = props["name"];
+          var lat = props["lat"];
+          var long = props["lon"];
+          var disctance =
+              Geolocator.distanceBetween(lat, long, lat, long) / 1000;
+
+          hotels.add({
+            "name": name,
+            "lat": lat,
+            "long": long,
+            "distance": disctance.toStringAsFixed(2),
+          });
+        }
+      }
+    }
+    return hotels;
   }
 
   static Future<Position?> getCurrentLocation() async {
@@ -190,10 +195,43 @@ class MainBloc extends Bloc<MainEvent, MainState> {
     }
   }
 
-  void _onChangeTo(OnMainChangedTo event, var emit) {
+  void _onChangeTo(OnMainChangedTo event, var emit) async {
     final state = this.state;
     if (state is MainLoaded) {
-      emit(state.copyWith(txtTo: event.value));
+      emit(state.copyWith(isMapLoading: true));
+
+      var response = await http.get(
+        Uri.parse(
+          ApiUrl.city(city: event.value),
+        ),
+        headers: {
+          "User-Agent": "basirudin.bee@gmail.com",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var maps = jsonDecode(response.body);
+        var place = maps[0];
+        var lat = double.parse(place["lat"]);
+        var long = double.parse(place["lon"]);
+
+        var hotels = await getHotels(lat, long);
+        var locHotels = await getLocHotels(hotels);
+
+        var latLng = LatLng(lat, long);
+        state.mapController!.move(latLng, 13);
+
+        print("maps: $lat, $long");
+        emit(state.copyWith(
+          txtTo: event.value,
+          hotels: <Map>[...hotels],
+          locHotels: <LatLng>[...locHotels],
+          currentLatLng: latLng,
+          isMapLoading: false,
+        ));
+      } else {
+        emit(state.copyWith(txtTo: event.value));
+      }
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:apptravel/state/main/main_bloc.dart';
 import 'package:apptravel/views/hotels.dart';
 import 'package:apptravel/widget/error.dart';
 import 'package:apptravel/widget/loading.dart';
+import 'package:apptravel/widget/notif.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -91,6 +92,11 @@ class _PageMainState extends State<PageMain> {
                         "To",
                         value: state.copyWith().txtTo,
                         onTap: () {
+                          if (state.copyWith().isMapLoading) {
+                            Notif.snackbar(context, message: "Please wait...");
+                            return;
+                          }
+
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,
@@ -125,37 +131,37 @@ class _PageMainState extends State<PageMain> {
                   }
                 },
               ),
-              Container(
-                height: 48,
-                margin: const EdgeInsets.only(top: 12),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.blue,
-                ),
-                child: Center(
-                  child: TextButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        useSafeArea: true,
-                        builder: (context) {
-                          return SheetHotels(
-                            hotels: state.hotels,
-                          );
-                        },
-                      );
-                    },
-                    child: const Text(
-                      "Search",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // Container(
+              //   height: 48,
+              //   margin: const EdgeInsets.only(top: 12),
+              //   width: double.infinity,
+              //   decoration: BoxDecoration(
+              //     borderRadius: BorderRadius.circular(12),
+              //     color: Colors.blue,
+              //   ),
+              //   child: Center(
+              //     child: TextButton(
+              //       onPressed: () {
+              //         showModalBottomSheet(
+              //           context: context,
+              //           isScrollControlled: true,
+              //           useSafeArea: true,
+              //           builder: (context) {
+              //             return SheetHotels(
+              //               hotels: state.hotels,
+              //             );
+              //           },
+              //         );
+              //       },
+              //       child: const Text(
+              //         "Search",
+              //         style: TextStyle(
+              //           color: Colors.white,
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -173,7 +179,7 @@ class _PageMainState extends State<PageMain> {
       mapController: state.mapController,
       options: MapOptions(
         initialCenter: cLoc!,
-        initialZoom: 14,
+        initialZoom: 13,
         onTap: (pos, latlang) {},
       ),
       children: [

@@ -20,6 +20,7 @@ class MainLoaded extends MainState {
   final MapController? mapController;
   final List<LatLng> locHotels;
   final List<Map> hotels;
+  final bool isMapLoading;
 
   const MainLoaded({
     required this.cities,
@@ -30,6 +31,7 @@ class MainLoaded extends MainState {
     this.mapController,
     this.locHotels = const [],
     this.hotels = const [],
+    this.isMapLoading = false,
   });
 
   MainLoaded copyWith({
@@ -41,6 +43,7 @@ class MainLoaded extends MainState {
     MapController? mapController,
     List<LatLng>? locHotels,
     List<Map>? hotels,
+    bool? isMapLoading,
   }) =>
       MainLoaded(
         cities: cities ?? this.cities,
@@ -51,6 +54,7 @@ class MainLoaded extends MainState {
         mapController: mapController ?? this.mapController,
         locHotels: locHotels ?? this.locHotels,
         hotels: hotels ?? this.hotels,
+        isMapLoading: isMapLoading ?? this.isMapLoading,
       );
 
   @override
@@ -63,6 +67,7 @@ class MainLoaded extends MainState {
         mapController,
         locHotels,
         hotels,
+        isMapLoading,
       ];
 }
 
