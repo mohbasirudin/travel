@@ -128,11 +128,19 @@ class MainBloc extends Bloc<MainEvent, MainState> {
               var name = props["name"];
               var lat = props["lat"];
               var long = props["lon"];
+              var disctance = Geolocator.distanceBetween(
+                    currentLatLng.latitude,
+                    currentLatLng.longitude,
+                    lat,
+                    long,
+                  ) /
+                  1000;
 
               hotels.add({
                 "name": name,
                 "lat": lat,
                 "long": long,
+                "distance": disctance.toStringAsFixed(2),
               });
             }
           }

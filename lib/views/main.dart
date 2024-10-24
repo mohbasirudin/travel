@@ -202,15 +202,36 @@ class _PageMainState extends State<PageMain> {
               for (var i = 0; i < locHotels.length; i++)
                 Marker(
                   point: locHotels[i],
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Colors.blue),
-                    child: const Icon(
-                      Icons.hotel_rounded,
-                      color: Colors.white,
-                      size: 24,
-                    ),
+                  height: 100,
+                  width: 100,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: const BoxDecoration(
+                            shape: BoxShape.circle, color: Colors.blue),
+                        child: const Icon(
+                          Icons.hotel_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      Text(
+                        state.hotels[i]['name'].toString(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        "${state.hotels[i]['distance']} km",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
           ],
