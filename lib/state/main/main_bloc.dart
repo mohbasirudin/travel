@@ -106,30 +106,42 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       final mapController = MapController();
       var cLocation = await getCurrentLocation();
       var currentLatLng = const LatLng(0, 0);
-
-      var listHotel = <Feature>[];
+      var hotels = <Map>[];
       if (cLocation != null) {
         currentLatLng = LatLng(cLocation.latitude, cLocation.longitude);
-        // mapController.move(currentLatLng, 18);
-        var hotels = await http.get(
+        var respHotel = await http.get(
           Uri.parse(
             ApiUrl.hotels(
-              lat: currentLatLng!.latitude,
+              lat: currentLatLng.latitude,
               long: currentLatLng.longitude,
             ),
+            // ApiUrl.hotels(
+            //   lat: -8.372224,
+            //   long: 114.147328,
+            // ),
           ),
         );
+        print("hotels: ${currentLatLng.latitude}, ${currentLatLng.longitude}");
 
-        if (hotels.statusCode == 200) {
-          var maps = jsonDecode(hotels.body);
-          var model = ModelHotels.fromJson(maps);
-          listHotel = model.features;
+        if (respHotel.statusCode == 200) {
+          var maps = jsonDecode(respHotel.body);
+          var features = maps["features"];
+          print("features: ${features.length}");
+          for (var i = 0; i < features.length; i++) {
+            var props = features[i]["properties"];
+            if (props.containsKey("name")) {
+              var name = props["name"];
+              var lat = props["lat"];
+              var long = props["lon"];
+              print("features: data: $name, $lat, $long");
 
-          // for (var i = 0; i < maps.length; i++) {
-          //   print("map: ${maps[i]}");
-          //   var name = maps[i]["name"];
-          //   provinces.add(name);
-          // }
+              hotels.add({
+                "name": name,
+                "lat": lat,
+                "long": long,
+              });
+            }
+          }
         }
       }
 
@@ -140,7 +152,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         txtDate: "-",
         mapController: mapController,
         currentLatLng: currentLatLng,
-        hotels: listHotel,
+        hotels: hotels,
       ));
     } catch (e) {
       print("main error: $e");

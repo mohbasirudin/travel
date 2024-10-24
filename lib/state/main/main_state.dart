@@ -19,7 +19,7 @@ class MainLoaded extends MainState {
   final LatLng? currentLatLng;
   final MapController? mapController;
   final List<LatLng> locHotels;
-  final List<Feature> hotels;
+  final List<Map> hotels;
 
   const MainLoaded({
     required this.cities,
@@ -40,7 +40,7 @@ class MainLoaded extends MainState {
     LatLng? currentLatLng,
     MapController? mapController,
     List<LatLng>? locHotels,
-    List<Feature>? hotels,
+    List<Map>? hotels,
   }) =>
       MainLoaded(
         cities: cities ?? this.cities,
