@@ -173,7 +173,7 @@ class _PageMainState extends State<PageMain> {
       mapController: state.mapController,
       options: MapOptions(
         initialCenter: cLoc!,
-        initialZoom: 12,
+        initialZoom: 14,
         onTap: (pos, latlang) {},
       ),
       children: [
@@ -185,20 +185,32 @@ class _PageMainState extends State<PageMain> {
           markers: [
             Marker(
               point: state.copyWith().currentLatLng!,
-              child: const Icon(
-                Icons.person_pin_circle,
-                color: Colors.red,
-                size: 24,
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.red,
+                ),
+                child: const Icon(
+                  Icons.person,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
             ),
             if (locHotels.isNotEmpty)
               for (var i = 0; i < locHotels.length; i++)
                 Marker(
                   point: locHotels[i],
-                  child: const Icon(
-                    Icons.hotel,
-                    color: Colors.blue,
-                    size: 24,
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Colors.blue),
+                    child: const Icon(
+                      Icons.hotel_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
                 ),
           ],
