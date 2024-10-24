@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:apptravel/networks/init.dart';
+import 'package:apptravel/networks/models/hotels.dart';
 import 'package:apptravel/networks/url.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -105,9 +106,31 @@ class MainBloc extends Bloc<MainEvent, MainState> {
       final mapController = MapController();
       var cLocation = await getCurrentLocation();
       var currentLatLng = const LatLng(0, 0);
+
+      var listHotel = <Feature>[];
       if (cLocation != null) {
         currentLatLng = LatLng(cLocation.latitude, cLocation.longitude);
         // mapController.move(currentLatLng, 18);
+        var hotels = await http.get(
+          Uri.parse(
+            ApiUrl.hotels(
+              lat: currentLatLng!.latitude,
+              long: currentLatLng.longitude,
+            ),
+          ),
+        );
+
+        if (hotels.statusCode == 200) {
+          var maps = jsonDecode(hotels.body);
+          var model = ModelHotels.fromJson(maps);
+          listHotel = model.features;
+
+          // for (var i = 0; i < maps.length; i++) {
+          //   print("map: ${maps[i]}");
+          //   var name = maps[i]["name"];
+          //   provinces.add(name);
+          // }
+        }
       }
 
       emit(MainLoaded(
@@ -117,6 +140,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         txtDate: "-",
         mapController: mapController,
         currentLatLng: currentLatLng,
+        hotels: listHotel,
       ));
     } catch (e) {
       print("main error: $e");

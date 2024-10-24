@@ -18,6 +18,8 @@ class MainLoaded extends MainState {
   final String txtDate;
   final LatLng? currentLatLng;
   final MapController? mapController;
+  final List<LatLng> locHotels;
+  final List<Feature> hotels;
 
   const MainLoaded({
     required this.cities,
@@ -26,6 +28,8 @@ class MainLoaded extends MainState {
     required this.txtDate,
     this.currentLatLng,
     this.mapController,
+    this.locHotels = const [],
+    this.hotels = const [],
   });
 
   MainLoaded copyWith({
@@ -35,6 +39,8 @@ class MainLoaded extends MainState {
     String? txtDate,
     LatLng? currentLatLng,
     MapController? mapController,
+    List<LatLng>? locHotels,
+    List<Feature>? hotels,
   }) =>
       MainLoaded(
         cities: cities ?? this.cities,
@@ -43,6 +49,8 @@ class MainLoaded extends MainState {
         txtDate: txtDate ?? this.txtDate,
         currentLatLng: currentLatLng ?? this.currentLatLng,
         mapController: mapController ?? this.mapController,
+        locHotels: locHotels ?? this.locHotels,
+        hotels: hotels ?? this.hotels,
       );
 
   @override
@@ -53,6 +61,8 @@ class MainLoaded extends MainState {
         txtDate,
         currentLatLng,
         mapController,
+        locHotels,
+        hotels,
       ];
 }
 

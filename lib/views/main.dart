@@ -1,4 +1,5 @@
 import 'package:apptravel/state/main/main_bloc.dart';
+import 'package:apptravel/views/hotels.dart';
 import 'package:apptravel/widget/error.dart';
 import 'package:apptravel/widget/loading.dart';
 import 'package:flutter/material.dart';
@@ -134,7 +135,18 @@ class _PageMainState extends State<PageMain> {
                 ),
                 child: Center(
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        useSafeArea: true,
+                        builder: (context) {
+                          return SheetHotels(
+                            hotels: state.hotels,
+                          );
+                        },
+                      );
+                    },
                     child: const Text(
                       "Search",
                       style: TextStyle(
