@@ -67,8 +67,10 @@ class _PageMainState extends State<PageMain> {
                         "From",
                         value: state.copyWith().txtFrom,
                         onTap: () {
-                          showBottomSheet(
+                          showModalBottomSheet(
                             context: context,
+                            isScrollControlled: true,
+                            useSafeArea: true,
                             builder: (context) {
                               return _SheetBottom(
                                 cities: state.copyWith().cities,
@@ -88,8 +90,10 @@ class _PageMainState extends State<PageMain> {
                         "To",
                         value: state.copyWith().txtTo,
                         onTap: () {
-                          showBottomSheet(
+                          showModalBottomSheet(
                             context: context,
+                            isScrollControlled: true,
+                            useSafeArea: true,
                             builder: (context) {
                               return _SheetBottom(
                                 cities: state.copyWith().cities,
@@ -109,7 +113,16 @@ class _PageMainState extends State<PageMain> {
               _boxField(
                 "Date",
                 value: state.copyWith().txtDate,
-                onTap: () {},
+                onTap: () async {
+                  var result = await showDatePicker(
+                    context: context,
+                    firstDate: DateTime.now().add(const Duration(days: 1)),
+                    lastDate: DateTime.now().add(const Duration(days: 30)),
+                  );
+                  if (result != null) {
+                    bloc.add(OnMainChangedDate(result.toString()));
+                  }
+                },
               ),
               Container(
                 height: 48,
@@ -135,31 +148,52 @@ class _PageMainState extends State<PageMain> {
           ),
         ),
         Expanded(
-          child: _viewMap(),
+          child: _viewMap(state),
         ),
       ],
     );
   }
 
-  Widget _viewMap() {
-    return Container();
-    // return FlutterMap(
-    //   mapController: state.mapController,
-    //   options: MapOptions(
-    //     initialCenter: cLocation,
-    //     initialZoom: 18,
-    //     onTap: (pos, latlang) {},
-    //   ),
-    //   children: [
-    //     TileLayer(
-    //       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    //       userAgentPackageName: 'id.basirudin.attendanceapp',
-    //     ),
-    //     MarkerLayer(
-    //       markers: [],
-    //     ),
-    //   ],
-    // );
+  Widget _viewMap(MainLoaded state) {
+    var cLoc = state.copyWith().currentLatLng;
+    return FlutterMap(
+      mapController: state.mapController,
+      options: MapOptions(
+        initialCenter: cLoc!,
+        initialZoom: 18,
+        onTap: (pos, latlang) {},
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'id.basirudin.attendanceapp',
+        ),
+        MarkerLayer(
+          markers: [
+            Marker(
+              point: state.copyWith().currentLatLng!,
+              child: const Icon(
+                Icons.person_pin_circle,
+                color: Colors.red,
+                size: 24,
+              ),
+            ),
+          ],
+        ),
+        CircleLayer(
+          circles: [
+            CircleMarker(
+              point: state.copyWith().currentLatLng!,
+              radius: 50,
+              useRadiusInMeter: true,
+              color: Colors.blue.withOpacity(0.1),
+              borderColor: Colors.blue.withOpacity(0.7),
+              borderStrokeWidth: 1,
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _boxField(
@@ -212,27 +246,69 @@ class _SheetBottom extends StatefulWidget {
 }
 
 class _SheetBottomState extends State<_SheetBottom> {
-  void _onSearch(String value) {}
+  var data = <String>[];
+  var cities = <String>[];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    cities = widget.cities;
+    data = cities;
+  }
+
+  void _onSearch(String value) {
+    if (value.isEmpty) {
+      data = cities;
+    } else {
+      data = cities
+          .where(
+              (element) => element.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    }
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Pilih Kota"),
+        title: const Text("Cities"),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.close,
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
-          TextField(
-            onChanged: _onSearch,
+          Padding(
+            padding: EdgeInsets.all(12),
+            child: TextField(
+              onChanged: _onSearch,
+              decoration: InputDecoration(
+                hintText: "Search",
+                border: InputBorder.none,
+                fillColor: Colors.grey.shade200,
+                filled: true,
+              ),
+            ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: widget.cities.length,
+              itemCount: data.length,
               padding: const EdgeInsets.all(12),
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(widget.cities[index]),
-                  onTap: () => widget.onTap(widget.cities[index]),
+                  title: Text(data[index]),
+                  onTap: () => widget.onTap(data[index]),
                 );
               },
             ),

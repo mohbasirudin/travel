@@ -5,7 +5,10 @@ import 'package:apptravel/networks/url.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
 
 part 'main_event.dart';
 part 'main_state.dart';
@@ -99,15 +102,41 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         "Sorong"
       ];
 
+      final mapController = MapController();
+      var cLocation = await getCurrentLocation();
+      var currentLatLng = const LatLng(0, 0);
+      if (cLocation != null) {
+        currentLatLng = LatLng(cLocation.latitude, cLocation.longitude);
+        // mapController.move(currentLatLng, 18);
+      }
+
       emit(MainLoaded(
         cities: cities,
         txtFrom: "-",
         txtTo: "-",
         txtDate: "-",
+        mapController: mapController,
+        currentLatLng: currentLatLng,
       ));
     } catch (e) {
+      print("main error: $e");
       emit(MainError());
     }
+  }
+
+  static Future<Position?> getCurrentLocation() async {
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return null;
+      }
+    }
+    final location = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    return location;
   }
 
   void _onChangeFrom(OnMainChangedFrom event, var emit) {
@@ -127,7 +156,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
   void _onChangeDate(OnMainChangedDate event, var emit) {
     final state = this.state;
     if (state is MainLoaded) {
-      emit(state.copyWith(txtTo: event.value));
+      emit(state.copyWith(txtDate: event.value));
     }
   }
 }
