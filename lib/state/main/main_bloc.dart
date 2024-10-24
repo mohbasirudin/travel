@@ -198,7 +198,10 @@ class MainBloc extends Bloc<MainEvent, MainState> {
   void _onChangeTo(OnMainChangedTo event, var emit) async {
     final state = this.state;
     if (state is MainLoaded) {
-      emit(state.copyWith(isMapLoading: true));
+      emit(state.copyWith(
+        isMapLoading: true,
+        txtTo: event.value,
+      ));
 
       var response = await http.get(
         Uri.parse(
@@ -218,8 +221,10 @@ class MainBloc extends Bloc<MainEvent, MainState> {
         var hotels = await getHotels(lat, long);
         var locHotels = await getLocHotels(hotels);
 
+        // final mapController = MapController();
         var latLng = LatLng(lat, long);
-        state.mapController!.move(latLng, 13);
+        final mapController = state.copyWith().mapController;
+        mapController!.move(latLng, 13);
 
         print("maps: $lat, $long");
         emit(state.copyWith(
@@ -228,6 +233,7 @@ class MainBloc extends Bloc<MainEvent, MainState> {
           locHotels: <LatLng>[...locHotels],
           currentLatLng: latLng,
           isMapLoading: false,
+          mapController: mapController,
         ));
       } else {
         emit(state.copyWith(txtTo: event.value));

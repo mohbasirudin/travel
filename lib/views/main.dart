@@ -173,10 +173,15 @@ class _PageMainState extends State<PageMain> {
   }
 
   Widget _viewMap(MainLoaded state) {
+    // var isMapLoading = state.copyWith().isMapLoading;
+    // if (isMapLoading) {
+    //   return const PageLoading();
+    // }
+
     var locHotels = state.copyWith().locHotels;
     var cLoc = state.copyWith().currentLatLng;
     return FlutterMap(
-      mapController: state.mapController,
+      mapController: state.copyWith().mapController,
       options: MapOptions(
         initialCenter: cLoc!,
         initialZoom: 13,
